@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f8f8;
+      color: #2a2a2a;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      color: #0057b7;
+    }
+
+    select, button, input {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 8px;
+      border: 2px solid #0057b7;
+    }
+
+    button {
+      background-color: #0057b7;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #003e87;
+    }
+
+    .clear-btn {
+      background-color: #b22222;
+    }
+
+    #result, #favorites {
+      margin-top: 20px;
+      font-size: 20px;
+      background-color: #eaeaea;
+      padding: 20px;
+      border-radius: 12px;
+      width: 80%;
+      display: inline-block;
+      border: 1px solid #aaa;
+    }
+
+    #favorites ul {
+      padding: 0;
+      list-style: none;
+    }
+
+    #favorite    s li {
+      margin: 5px 0;
+    }
+  </style>
+   <h1>
+<img src="https://flagcdn.com/w80/gb.png" alt="UK Flag" width="40" style="vertical-align: middle;">
+  What British Food Should I Eat?
+  <img src="https://flagcdn.com/w80/gb.png" alt="UK Flag" width="40" style="vertical-align: middle;">
+
+</h1>
+
+<label for="category">Choose a category:</label>
+  <select id="category">
+    <option value="any">Any</option>
+    <option value="main">Main Dishes</option>
+    <option value="breakfast">Breakfast</option>
+    <option value="dessert">Desserts</option>
+    <option value="pub">Pub Favourites</option>
+  </select>
+  
+   <button onclick="suggestMeal()">Give Me an Idea</button>
+  <button onclick="saveFavorite()">❤️ Save to Favorites</button>
+  <button onclick="clearFavorites()" class="clear-btn">🗑️ Clear Favorites</button>
+
+   <div id="result"></div>
+
+  <h3>Add Your Own Meal:</h3>
+  <input type="text" id="customMeal" placeholder="Type a UK meal...">
+  <button onclick="addCustomMeal()">Add Meal</button>
+
+  <div id="favorites">
+    <h3>🍽️ Your Favorite Meals:</h3>
+    <ul id="favList"></ul>
+  </div>
+  
+
+  <script>
+    const meals = {
+      any: [],
+      main: [
+        "Fish and Chips 🐟🍟", "Shepherd's Pie 🥧", "Roast Beef with Yorkshire Pudding 🥩",
+        "Bangers and Mash 🌭🥔", "Chicken Tikka Masala 🍛", "Steak and Kidney Pie 🥩", "Sunday Roast 🍗"
+      ],
+      breakfast: [
+        "Full English Breakfast 🍳", "Beans on Toast 🥫🍞", "Black Pudding & Eggs 🥓","Cereal & Milk 🥣"
+      ],
+      dessert: [
+        "Sticky Toffee Pudding 🍮","Toffee Ice Cream🍦","Victoria Sponge 🍓"
+      ],
+      pub: [
+        "Scotch Egg 🥚", "Ploughman’s Lunch 🧀🍞", "Sausage Roll 🧁",
+        "Pint of Ale & Crisps 🍺", "Gammon and Eggs 🍳", "Beef Wellington 🥩🥐"
+      ]
+    };
+
+    let currentSuggestion = "";
+
+    function suggestMeal() {
+      const category = document.getElementById('category').value;
+      const baseMeals = category === "any"  ? Object.values(meals).flat()
+      
+     : meals[category];
+
+      const customMeals = JSON.parse(localStorage.getItem(`customMeals_${category}`)) || [];
+      const allMeals = baseMeals.concat(customMeals);
+
+      if (allMeals.length === 0) {
+        document.getElementById("result").textContent = "No meals found in this category.";
+        currentSuggestion = "";
+        return;
+      }
+
+      const suggestion = allMeals[Math.floor(Math.random() * allMeals.length)];
+      document.getElementById("result").textContent = `You should eat: ${suggestion}`;
+      currentSuggestion = suggestion;
+    }
+
+    function saveFavorite() {
+      if (!currentSuggestion) return;
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      if (!favorites.includes(currentSuggestion)) {
+        favorites.push(currentSuggestion);
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+        displayFavorites();
+      }
+    }
+
+    function displayFavorites() {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      const favList = document.getElementById("favList");
+      favList.innerHTML = "";
+
+      favorites.forEach(meal => {
+        const li = document.createElement("li");
+        li.textContent = meal;
+        favList.appendChild(li);
+      });
+    }
+
+    function addCustomMeal() {
+      const meal = document.getElementById("customMeal").value.trim();
+      if (!meal) return;
+
+      const category = document.getElementById("category").value;
+      let stored = JSON.parse(localStorage.getItem(`customMeals_${category}`)) || [];
+      stored.push(meal);
+      localStorage.setItem(`customMeals_${category}`, JSON.stringify(stored));
+
+      document.getElementById("customMeal").value = "";
+      alert("Meal added! Click 'Give Me an Idea' again.");
+    }
+
+    function clearFavorites() {
+      if (confirm("Are you sure you want to clear all your favorite meals?")) {
+        localStorage.removeItem("favorites");
+        displayFavorites();
+      }
+    }
+
+
+    displayFavorites();
+
+    
+</script>
+</body>
+</html>
